@@ -1,0 +1,10 @@
+[package]
+name = "can_trace_parser"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chrono = "0.4.44"
+blf_asc = "0.2"
+anyhow = "1.0.102"
+rayon = "1.11.0"
