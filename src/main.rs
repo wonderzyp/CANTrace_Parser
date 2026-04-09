@@ -1,3 +1,5 @@
+// can_trace_parser Copyright (C) 2026 wonderzyp@gmail.com
+
 use chrono::{TimeZone, FixedOffset};
 use blf_asc::{BlfReader};
 use std::path::{Path, PathBuf};
@@ -20,7 +22,7 @@ fn format_timestamp(ts_float: f64, time_format: &str) -> String {
 }
 
 fn parse_blf<P: AsRef<Path>>(file_path: P) -> anyhow::Result<()> {
-    let res_dir = Path::new("res");
+    let res_dir = Path::new("resu");
     if !res_dir.exists() {
         fs::create_dir_all(res_dir)?;
     }
@@ -57,9 +59,8 @@ fn parse_blf<P: AsRef<Path>>(file_path: P) -> anyhow::Result<()> {
         } else {
             eprintln!("Failed to open BLF: {:?}", reader_res.err());
         }
-
-
     }
+    
     let final_name = if let (Some(first), Some(last)) = (first_msg, last_msg) {
         let res = format!("{}---{}.txt", first, last);
         
@@ -77,29 +78,34 @@ fn parse_blf<P: AsRef<Path>>(file_path: P) -> anyhow::Result<()> {
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        println!("Usage: {} ./<dir contains BLF files>", args[0]);
+        println!("Usage: {} ./<blf file> or <dir>", args[0]);
         return Ok(());
     }
 
     let target_dir = &args[1];
-    let path = Path::new(target_dir);
-    if !path.is_dir() {
-        anyhow::bail!("Invalid Path {}", target_dir);
-    }
+    let input_path = Path::new(target_dir);
 
-    let entries: Vec<_> = fs::read_dir(path).context("Failed to read dir")?.collect();
-    entries.par_iter().for_each(|entry| {
-        if let Ok(entry) = entry {
-            let file_path = entry.path();
-
-            if file_path.is_file() {
-                println!("Processing {:?}", file_path.file_name().unwrap());
-                if let Err(e) = parse_blf(&file_path) {
-                    eprintln!("Parse {:?} Err {}", file_path, e);
+    if input_path.is_file() {
+        if let Err(e) = parse_blf(&input_path) {
+            eprintln!("Parse {:?} Err {}", input_path, e);
+        }
+    } else if input_path.is_dir() {
+        let entries: Vec<_> = fs::read_dir(input_path).context("Failed to read dir")?.collect();
+        entries.par_iter().for_each(|entry| {
+            if let Ok(entry) = entry {
+                let file_path = entry.path();
+    
+                if file_path.is_file() {
+                    println!("Processing {:?}", file_path.file_name().unwrap());
+                    if let Err(e) = parse_blf(&file_path) {
+                        eprintln!("Parse {:?} Err {}", file_path, e);
+                    }
                 }
             }
-        }
-    });
+        });
+    } else {
+        anyhow::bail!("Invalid Path {}", target_dir);
+    }
 
     Ok(())
 }
