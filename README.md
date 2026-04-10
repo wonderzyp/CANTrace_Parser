@@ -1,5 +1,5 @@
-# CAN Trace BLF Parser
-A cross-platform CLI tool written in Rust for parsing CAN bus .blf (Binary Logging Format) files into human-readable text.
+# CAN BLF Decoder
+A cross-platform CLI tool written in Rust for decoding CAN bus .blf (Binary Logging Format) files into human-readable text.
 
 
 ## Installation
